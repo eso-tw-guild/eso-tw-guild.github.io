@@ -18,16 +18,20 @@ const MainView = () => {
     >
       <Grid container justifyContent="center" columnSpacing={3} rowSpacing={3}>
         <Grid item xs={10} sm={3}>
-          <MenuCard
-            image={dungeon}
-            title={'團隊招募'}
-          />
+          <Link to={'/group'}>
+            <MenuCard
+              image={dungeon}
+              title={'團隊招募'}
+            />
+          </Link>
         </Grid>
         <Grid item xs={10} sm={3}>
-          <MenuCard
-            image={heroes}
-            title={'公會成員'}
-          />
+          <Link to={'/guild-member'}>
+            <MenuCard
+              image={heroes}
+              title={'公會成員'}
+            />
+          </Link>
         </Grid>
         <Grid item xs={10} sm={3}>
           <Link to={'/my-profile'}>

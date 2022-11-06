@@ -1,0 +1,15 @@
+.lineLoginButton {
+    background: url('../asset/img/line_login/btn_login_base.png') no-repeat;
+    border: 0px;
+    width: 303px;
+    height: 88px;
+    cursor: pointer;
+}
+
+.lineLoginButton:hover {
+    background: url('../asset/img/line_login/btn_login_hover.png') no-repeat;
+}
+
+.lineLoginButton:active {
+    background: url('../asset/img/line_login/btn_login_press.png') no-repeat;
+}

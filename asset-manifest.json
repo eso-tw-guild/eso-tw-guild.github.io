@@ -1,16 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.3b7bb3dc.css",
-    "main.js": "/static/js/main.2e8a9a34.js",
+    "main.css": "/static/css/main.d088919f.css",
+    "main.js": "/static/js/main.7af84ab2.js",
     "static/js/787.fc051ed1.chunk.js": "/static/js/787.fc051ed1.chunk.js",
+    "static/media/dungeon.jpg": "/static/media/dungeon.57f4598fb0133b48b929.jpg",
+    "static/media/archer.jpg": "/static/media/archer.6126231469d4c5b1123c.jpg",
+    "static/media/heroes.jpg": "/static/media/heroes.5c415f3056e7fd9a953c.jpg",
     "static/media/tg_with_text_white.png": "/static/media/tg_with_text_white.4ec88318407627289f67.png",
     "index.html": "/index.html",
-    "main.3b7bb3dc.css.map": "/static/css/main.3b7bb3dc.css.map",
-    "main.2e8a9a34.js.map": "/static/js/main.2e8a9a34.js.map",
+    "main.d088919f.css.map": "/static/css/main.d088919f.css.map",
+    "main.7af84ab2.js.map": "/static/js/main.7af84ab2.js.map",
     "787.fc051ed1.chunk.js.map": "/static/js/787.fc051ed1.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3b7bb3dc.css",
-    "static/js/main.2e8a9a34.js"
+    "static/css/main.d088919f.css",
+    "static/js/main.7af84ab2.js"
   ]
 }

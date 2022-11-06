@@ -1,4 +1,5 @@
 import Grid from '@mui/material/Grid';
+import { Link } from 'react-router-dom';
 
 import MenuCard from '../component/MenuCard';
 
@@ -6,7 +7,7 @@ import heroes from '../asset/img/eso/heroes.jpg'
 import dungeon from '../asset/img/eso/dungeon.jpg'
 import archer from '../asset/img/eso/archer.jpg'
 
-export default function ActionAreaCard() {
+const MainView = () => {
   return (
     <Grid
       container
@@ -14,7 +15,6 @@ export default function ActionAreaCard() {
       direction="column"
       justifyContent="center"
       style={{ minHeight: '100vh' }}
-      marginTop={1}
     >
       <Grid container justifyContent="center" columnSpacing={3} rowSpacing={3}>
         <Grid item xs={10} sm={3}>
@@ -30,12 +30,16 @@ export default function ActionAreaCard() {
           />
         </Grid>
         <Grid item xs={10} sm={3}>
-          <MenuCard
-            image={archer}
-            title={'個人資訊'}
-          />
+          <Link to={'/my-profile'}>
+            <MenuCard
+              image={archer}
+              title={'個人資訊'}
+            />
+          </Link>
         </Grid>
       </Grid>
     </Grid>
   );
 }
+
+export default MainView;

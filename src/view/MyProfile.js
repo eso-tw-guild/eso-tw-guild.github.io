@@ -13,7 +13,6 @@ import { Link } from 'react-router-dom';
 import { ApiBaseURL } from '../component/Conf';
 import { BannerSuccess, BannerError } from '../component/Banner';
 import { fetchGet, fetchPut } from '../component/Fetch';
-import { useNavigate } from "react-router-dom";
 
 const MyProfileView = () => {
   const [nickName, setNickName] = useState('');
@@ -25,12 +24,31 @@ const MyProfileView = () => {
   const [lockUI, setLockUI] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
-  const navigate = useNavigate();
+  const [errMsg, setErrMsg] = useState('');
+  const [showForm, setShowForm] = useState('hidden');
+  const [changed, setChanged] = useState(false);
+
+  const resetBanner = () => {
+    setShowSuccess(false);
+    setShowError(false);
+  }
+  const showSuccessBanner = () => {
+    resetBanner();
+    setShowSuccess(true);
+  }
+  const showErrorBanner = (e) => {
+    resetBanner();
+    setShowError(true);
+    setErrMsg(e);
+  }
 
   useEffect(() => {
     resetBanner();
+    setShowForm('hidden');
+    setLockUI(true);
+    setChanged(false);
 
-    fetchGet(ApiBaseURL + '/profile', navigate)
+    fetchGet(ApiBaseURL + '/profile')
       .then(
         res => {
           setLockUI(false);
@@ -45,24 +63,18 @@ const MyProfileView = () => {
         setHasHealer(d.data.has_healer);
         setHasDD(d.data.has_dd);
         setHasPvP(d.data.has_pvp);
+        setShowForm('visible');
       })
-      .catch((error) => {});
-  }, [navigate]);
-
-  const resetBanner = () => {
-    setShowSuccess(false);
-    setShowSuccess(false);
-  }
-  const showSuccessBanner = () => {
-    setShowSuccess(true);
-  }
-  const showErrorBanner = () => {
-    setShowSuccess(true);
-  }
+      .catch((error) => {
+        showErrorBanner(error); 
+        setShowForm('visible'); 
+      });
+  }, []);
 
   const update = () => {
     resetBanner();
     setLockUI(true);
+    setChanged(false);
 
     const data = {
       nick_name: nickName,
@@ -72,7 +84,7 @@ const MyProfileView = () => {
       has_dd: hasDD,
       has_pvp: hasPvP
     }
-    fetchPut(ApiBaseURL + '/profile', data, navigate)
+    fetchPut(ApiBaseURL + '/profile', data)
       .then(res => {
         setLockUI(false);
         if (!res.ok) throw new Error(res.status);
@@ -80,7 +92,7 @@ const MyProfileView = () => {
         return res.json()
       })
       .then(data => console.log(data))
-      .catch ((error) => { showErrorBanner(); });
+      .catch((error) => { showErrorBanner(error); });
   }
 
   return (
@@ -98,7 +110,7 @@ const MyProfileView = () => {
       <Grid container justifyContent={'center'} >
         <Grid item xs={12}>
           <BannerSuccess displayed={showSuccess}>更新成功</BannerSuccess>
-          <BannerError displayed={showError}>發生錯誤</BannerError>
+          <BannerError displayed={showError}>{'發生錯誤: ' + errMsg}</BannerError>
         </Grid>
         <Paper
           elevation={3}
@@ -107,6 +119,7 @@ const MyProfileView = () => {
           justifyContent={'center'}
           xs={10} sm={8} md={6}
           marginTop={5}
+          visibility={showForm}
         >
           <Grid
             item container
@@ -124,7 +137,9 @@ const MyProfileView = () => {
                 label="PSN ID"
                 disabled={lockUI}
                 value={psnID}
-                onChange={e => setPsnID(e.target.value)}
+                helperText={psnID ? "" : "不可為空"}
+                error={!psnID}
+                onChange={e => {setPsnID(e.target.value); setChanged(true)}}
               />
             </Grid>
             <Grid item>
@@ -135,7 +150,9 @@ const MyProfileView = () => {
                 label="暱稱"
                 disabled={lockUI}
                 value={nickName}
-                onChange={e => setNickName(e.target.value)}
+                helperText={nickName ? "" : "不可為空"}
+                error={!nickName}
+                onChange={e => {setNickName(e.target.value); setChanged(true)}}
               />
             </Grid>
             <Grid item container>
@@ -146,28 +163,28 @@ const MyProfileView = () => {
                   label="坦克" 
                   disabled={lockUI}
                   checked={hasTank} 
-                  onChange={e => setHasTank(e.target.checked)}
+                  onChange={e => {setHasTank(e.target.checked); setChanged(true)}}
                 />
                 <FormControlLabel 
                   control={<Checkbox />} 
                   label="補師"
                   disabled={lockUI}
                   checked={hasHealer}
-                  onChange={e => setHasHealer(e.target.checked)}
+                  onChange={e => {setHasHealer(e.target.checked); setChanged(true)}}
                 />
                 <FormControlLabel 
                   control={<Checkbox />} 
                   label="輸出"
                   disabled={lockUI}
                   checked={hasDD}
-                  onChange={e => setHasDD(e.target.checked)}
+                  onChange={e => {setHasDD(e.target.checked); setChanged(true)}}
                 />
                 <FormControlLabel 
                   control={<Checkbox />} 
                   label="PvP" 
                   disabled={lockUI}
                   checked={hasPvP}
-                  onChange={e => setHasPvP(e.target.checked)}
+                  onChange={e => {setHasPvP(e.target.checked); setChanged(true)}}
                 />
               </FormGroup>
             </Grid>
@@ -175,7 +192,7 @@ const MyProfileView = () => {
               <Button 
                 variant="contained"
                 onClick={e => update()} 
-                disabled={lockUI}
+                disabled={lockUI || (!changed) || (!psnID) || (!nickName)}
               >更新個人資訊</Button>
             </Grid>
           </Grid>

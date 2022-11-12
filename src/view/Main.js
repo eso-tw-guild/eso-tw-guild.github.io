@@ -1,5 +1,10 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import Grid from '@mui/material/Grid';
+import { fetchGet } from '../component/Fetch';
 import { Link } from 'react-router-dom';
+import { ApiBaseURL } from '../component/Conf';
+import { updateProfile } from '../component/Session';
 
 import MenuCard from '../component/MenuCard';
 
@@ -8,6 +13,33 @@ import dungeon from '../asset/img/eso/dungeon.jpg'
 import archer from '../asset/img/eso/archer.jpg'
 
 const MainView = () => {
+  const navigate = useNavigate();
+  const [showView, setShowView] = useState('hidden');
+
+  useEffect(() => {
+    fetchGet(ApiBaseURL + '/session')
+      .then(
+        res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        }
+      )
+      .then(d => {
+        if (!d.data.psn_id) {
+          navigate('/my-profile');
+          return;
+        }
+        if (!d.data.line_notify_enabled) {
+          navigate('/enable-line-notify');
+          return;
+        }
+        updateProfile(d.data);
+        setShowView('visible');
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  }, []);
   return (
     <Grid
       container
@@ -15,6 +47,7 @@ const MainView = () => {
       direction="column"
       justifyContent="center"
       style={{ minHeight: '100vh' }}
+      visibility={showView}
     >
       <Grid container justifyContent="center" columnSpacing={3} rowSpacing={3}>
         <Grid item xs={10} sm={3}>

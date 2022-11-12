@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Cookies } from 'react-cookie';
-import { StorageKeyTgSession } from './Conf';
+import { getSessionToken, removeSessionToken } from './Session';
+import { WebsiteURL } from './Conf';
 
-const _fetch = (method, url, navigate, options={}) => {
+const _fetch = (method, url, options={}) => {
   let opts = {
     ...options,
     ...{
@@ -31,7 +32,7 @@ const _fetch = (method, url, navigate, options={}) => {
     }
   }
 
-  const token = localStorage.getItem(StorageKeyTgSession);
+  const token = getSessionToken();
   if (token) {
     opts.headers.Authorization = 'Bearer ' + token;
   }
@@ -40,25 +41,28 @@ const _fetch = (method, url, navigate, options={}) => {
     .then(
       res => {
         if (res.status === 401) {
-          navigate('/');
+          removeSessionToken();
+          window.location.href = WebsiteURL;
+          return;
         }
         if (res.status === 403) {
-          navigate('/main');
+          window.location.href = WebsiteURL + '/main';
+          return;
         }
         return res
       }
     )
 }
 
-export const fetchGet = (url, navigate, options={}) => {
-  return _fetch('GET', url, navigate, options)
+export const fetchGet = (url, options={}) => {
+  return _fetch('GET', url, options)
 }
 
-export const fetchDelete = (url, navigate, options={}) => {
-  return _fetch('DELETE', url, navigate, options)
+export const fetchDelete = (url, options={}) => {
+  return _fetch('DELETE', url, options)
 }
 
-export const fetchPost = (url, data, navigate, options={}) => {
+export const fetchPost = (url, data, options={}) => {
   let opts = {
     ...options,
     ...{ 'body': JSON.stringify(data) }
@@ -69,10 +73,10 @@ export const fetchPost = (url, data, navigate, options={}) => {
     ...{ 'Content-Type': 'application/json' }
   }  
   
-  return _fetch('POST', url, navigate, opts)
+  return _fetch('POST', url, opts)
 }
 
-export const fetchPut = (url, data, navigate, options={}) => {
+export const fetchPut = (url, data, options={}) => {
   let opts = {
     ...options,
     ...{ 'body': JSON.stringify(data) }
@@ -83,5 +87,5 @@ export const fetchPut = (url, data, navigate, options={}) => {
     ...{ 'Content-Type': 'application/json' }
   }
 
-  return _fetch('PUT', url, navigate, opts)
+  return _fetch('PUT', url, opts)
 }

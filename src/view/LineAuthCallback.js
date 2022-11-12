@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
 import { ApiBaseURL } from '../component/Conf';
 import { fetchPost } from '../component/Fetch';
-import { StorageKeyTgSession, StorageKeyTgLineState, WebsiteURL } from '../component/Conf';
+import { StorageKeyTgLineState, WebsiteURL } from '../component/Conf';
+import { updateSessionToken } from '../component/Session';
 
 const LineAuthCallbackView = () => {
-  const navigate = useNavigate();
-
   useEffect(() => {
     let params = new URLSearchParams(document.location.search);
     let code = params.get('code');
@@ -14,23 +12,23 @@ const LineAuthCallbackView = () => {
     let lineState = localStorage.getItem(StorageKeyTgLineState);
     localStorage.removeItem(StorageKeyTgLineState);
     if (lineState !== state) {
-      navigate('/');
-      return;
+      window.location.href = WebsiteURL;
     }
   
-    fetchPost(ApiBaseURL + '/session', {code: code}, navigate)
+    fetchPost(ApiBaseURL + '/session', {code: code})
       .then(
         res => {
           if (res.ok) {
             return res.json();
           }
+          window.location.href = WebsiteURL;
         }
       )
       .then(d => {
-        localStorage.setItem(StorageKeyTgSession, d.data.token);
-        window.location.href = WebsiteURL
+        updateSessionToken(d.data.token);
+        window.location.href = WebsiteURL + '/#/main'
       });
-  }, [navigate]);
+  }, []);
   return (
     <div></div>
   );

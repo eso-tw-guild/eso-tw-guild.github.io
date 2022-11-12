@@ -11,6 +11,7 @@ import CreateGroupView from './view/CreateGroup';
 import MyProfileView from './view/MyProfile';
 import GuildMemberView from './view/GuildMember';
 import LineAuthCallbackView from './view/LineAuthCallback';
+import EnableLineNotifyView from './view/EnableLineNotify';
 
 const Router = () => {
   return (
@@ -23,6 +24,8 @@ const Router = () => {
         <Route path="/guild-member" element={<GuildMemberView />} />
         <Route path="/my-profile" element={<MyProfileView />} />
         <Route path="/line-auth-callback" element={<LineAuthCallbackView />} />
+        <Route path="/enable-line-notify" element={<EnableLineNotifyView />} />
+        <Route path="/enable-line-notify/:action" element={<EnableLineNotifyView />} />
       </Routes>
     </HashRouter>
   );

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import Grid from '@mui/material/Grid';
-import { ApiBaseURL, LineAuthCallbackURL } from '../component/Conf';
-import { fetchGet } from '../component/Fetch';
-import { StorageKeyTgSession, StorageKeyTgLineState } from '../component/Conf';
+import { LineAuthCallbackURL } from '../component/Conf';
+import { StorageKeyTgLineState } from '../component/Conf';
 import { v4 as uuidv4 } from 'uuid';
+import { getSessionToken } from '../component/Session';
 
 import styles from './Login.module.css';
 
@@ -30,18 +30,13 @@ const LoginView = () => {
   }
 
   useEffect(() => {
-    fetchGet(ApiBaseURL + '/session', navigate)
-      .then(
-        res => {
-          if (res.ok) {
-            navigate('/main');
-            return;
-          }
-          localStorage.removeItem(StorageKeyTgSession);
-          setShowView('visible');
-        }
-      );
-  }, [navigate]);
+    const token = getSessionToken();
+    if (token) {
+      navigate('/main');
+      return;
+    }
+    setShowView('visible');
+  }, []);
   return (
     <Grid
       container

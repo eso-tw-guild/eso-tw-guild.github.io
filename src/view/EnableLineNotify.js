@@ -9,12 +9,11 @@ import { Link } from 'react-router-dom';
 import { ApiBaseURL } from '../component/Conf';
 import { BannerSuccess, BannerError } from '../component/Banner';
 import { fetchPost } from '../component/Fetch';
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { StorageKeyTgLineState, LineNotifyCallbackURL, WebsiteURL } from '../component/Conf';
 
 const EnableLineNotifyView = () => {
-  const navigate = useNavigate();
   const [lockUI, setLockUI] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);

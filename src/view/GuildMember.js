@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import AppBar from '@mui/material/AppBar';
 import Paper from '@mui/material/Paper';
@@ -10,19 +11,30 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { fetchGet } from '../component/Fetch';
 import { Link } from 'react-router-dom';
-
-function createData(psn_id, nickname, role) {
-  return { psn_id, nickname, role };
-}
-
-const rows = [
-  createData('blackcanlin', '罐頭', 'T/H/D/PvP'),
-  createData('s9512525', '坦哥', 'T/H/D/PvP'),
-  createData('soma123', 'soma', 'D'),
-];
+import { ApiBaseURL } from '../component/Conf';
+import { RoleChipStack } from '../component/RoleChip';
 
 const GuildMemberView = () => {
+  const [members, setMembers] = useState([]);
+
+  useEffect(() => {
+    fetchGet(ApiBaseURL + '/members')
+      .then(
+        res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        }
+      )
+      .then(d => {
+        setMembers(d.data.members);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  }, []);
+
   return (
     <div>
       <AppBar position="static">
@@ -47,16 +59,27 @@ const GuildMemberView = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
+                {members.map((row) => (
                   <TableRow
-                    key={row.name}
+                    key={row.nickname}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell component="th" scope="row">
                       {row.psn_id}
                     </TableCell>
                     <TableCell>{row.nickname}</TableCell>
-                    <TableCell align="right">{row.role}</TableCell>
+                    <TableCell align="right">
+                      <RoleChipStack 
+                        spacing={0.5}
+                        justifyContent="flex-end"
+                        roles={{
+                          hasTank: row.has_tank,
+                          hasHealer: row.has_healer,
+                          hasDD: row.has_dd,
+                          hasPvP: row.has_pvp
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

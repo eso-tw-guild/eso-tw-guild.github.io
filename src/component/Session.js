@@ -15,9 +15,9 @@ export const removeSessionToken = () => {
 }
 
 export const getProfile = () => {
-  return localStorage.getItem(keyTgProfile);
+  return JSON.parse(localStorage.getItem(keyTgProfile));
 }
 
 export const updateProfile = (p) => {
-  localStorage.setItem(keyTgProfile, p);
+  localStorage.setItem(keyTgProfile, JSON.stringify(p));
 }

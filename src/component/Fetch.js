@@ -46,7 +46,7 @@ const _fetch = (method, url, options={}) => {
           return;
         }
         if (res.status === 403) {
-          window.location.href = WebsiteURL + '/main';
+          window.location.href = WebsiteURL + '/#/main';
           return;
         }
         return res

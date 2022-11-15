@@ -13,36 +13,39 @@ import { Link } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { RoleChipStack } from '../component/RoleChip';
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import FlagIcon from '@mui/icons-material/Flag';
-import { fetchGet, fetchPost } from '../component/Fetch';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import { fetchGet, fetchPut } from '../component/Fetch';
 import { ApiBaseURL, WebsiteURL } from '../component/Conf';
 import { BannerSuccess, BannerError } from '../component/Banner';
 import { getProfile } from '../component/Session';
+import { useParams } from "react-router-dom";
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 
-const CreateGroupView = () => {
+const CheckGroupView = () => {
   if (!getProfile()) {
     window.location.href = WebsiteURL;
   }
 
-  const leader = getProfile().mid;
+  const { gid } = useParams();
+  const mid = getProfile().mid;
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [time, setTime] = useState(dayjs().format());
-  const [timeValid, setTimeValid] = useState(true);
-  const [formDirty, setFormDirty] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [members, setMembers] = useState([]);
-  const [chosenMembers, setChosenMembers] = useState([]);
   const [showForm, setShowForm] = useState('hidden');
   const [lockUI, setLockUI] = useState(false);
+  const [myResp, setMyResp] = useState(0);
+  const [leader, setLeader] = useState('');
 
-  let nameValid = name
-  let formValid = timeValid && nameValid
 
   const resetBanner = () => {
     setShowSuccess(false);
@@ -58,35 +61,58 @@ const CreateGroupView = () => {
     setErrMsg(e);
   }
 
-  const addGroup = () => {
+  const chipColor = (mid, response) => {
+    if (mid === leader) {
+      return {
+        'color': 'secondary',
+        'icon': (<FlagIcon />)
+      }
+    }
+    if (response === 1) {
+      return {
+        'color': 'success',
+        'icon': (<CheckIcon />)
+      }
+    }
+    if (response === 2) {
+      return {
+        'color': 'error',
+        'disabled': true,
+        'icon': (<CloseIcon />)
+      }
+    }
+    return {
+      'color': 'default',
+      'icon': (<QuestionMarkIcon />)
+    }
+  }
+
+  const updateResponse = (resp) => {
     resetBanner();
     setLockUI(true);
-    setFormDirty(false);
 
     const data = {
-      'name': name,
-      'desc': desc,
-      'start_time': time,
-      'members': chosenMembers.map(e => e.mid)
+      'response': resp
     }
 
-    fetchPost(ApiBaseURL + '/groups', data)
+    fetchPut(ApiBaseURL + '/groups/' + gid + '/members/' + mid + '/response', data)
       .then(res => {
         setLockUI(false);
         if (!res.ok) throw new Error(res.status);
         showSuccessBanner();
         return res.json()
       })
-      .then(d => {
-        window.location.href = WebsiteURL + '/#/group';
-      })
+      .then(data => console.log(data))
       .catch((error) => { showErrorBanner(error); });
   }
 
   useEffect(() => {
     resetBanner();
     setShowForm('hidden');
-    fetchGet(ApiBaseURL + '/members')
+    if (!gid) {
+      return;
+    }
+    fetchGet(ApiBaseURL + '/groups/' + gid)
       .then(
         res => {
           if (!res.ok) throw new Error(res.status);
@@ -95,7 +121,14 @@ const CreateGroupView = () => {
       )
       .then(d => {
         setMembers(d.data.members);
-        setChosenMembers(d.data.members.filter(e => e.mid === leader));
+        setDesc(d.data.desc);
+        setName(d.data.name);
+        setLeader(d.data.leader);
+        setTime(dayjs(d.data.start_time).format());
+        let me = d.data.members.find(x => x.mid === mid);
+        if (me) {
+          setMyResp(me.response);
+        }
         setShowForm('visible');
       })
       .catch(e => {
@@ -108,7 +141,7 @@ const CreateGroupView = () => {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            創立團隊
+            團隊資訊
           </Typography>
           <Link to={'/group'}>
             <Button>回團隊列表</Button>
@@ -117,7 +150,7 @@ const CreateGroupView = () => {
       </AppBar>
       <Grid container justifyContent={'center'}>
         <Grid item xs={12}>
-          <BannerSuccess displayed={showSuccess}>創立團隊成功</BannerSuccess>
+          <BannerSuccess displayed={showSuccess}>已更新參加狀態</BannerSuccess>
           <BannerError displayed={showError}>{'發生錯誤: ' + errMsg}</BannerError>
         </Grid>
         <Paper
@@ -143,81 +176,41 @@ const CreateGroupView = () => {
                 required
                 id="team-name"
                 label="團隊名稱"
-                placeholder='VCR+3, 大地根三合一, 戰場團, ...'
-                onChange={e => {setName(e.target.value); setFormDirty(true)}}
-                error={(!nameValid && formDirty)}
-                helperText={(!nameValid && formDirty) ? '不可為空' : ''}
-                disabled={lockUI}
+                InputProps={{
+                  readOnly: true
+                }}
+                value={name}
               />
             </Grid>
             <Grid item>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateTimePicker
+                  readOnly
                   label="出團時間"
                   value={time}
-                  onError={(value) => setTimeValid(!value)}
-                  onChange={t => { setTime(t.format()); setFormDirty(true) }}
                   renderInput={(params) => <TextField fullWidth {...params} />}
                   inputFormat="YYYY/MM/DD hh:mm A"
-                  minDate={dayjs()}
-                  maxDate={dayjs().add(1, 'month')}
-                  disabled={lockUI}
                 />
               </LocalizationProvider>
             </Grid>
             <Grid item container>
               <Autocomplete
                 multiple
-                disabled={lockUI}
+                readOnly
                 id="members-select"
-                value={chosenMembers}
-                onChange={(event, newValue) => {
-                  setChosenMembers([
-                    ...members.filter(e => e.mid === leader),
-                    ...newValue.filter(e => e.mid !== leader),
-                  ]);
-                  setFormDirty(true);
-                }}
-                isOptionEqualToValue={(option, value) => option.mid === value.mid}
-                options={members}
-                getOptionLabel={(option) => option.nickname + '(' + option.psn_id + ')'}
-                renderOption={(props, option) => (
-                  <Box {...props}>
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      width={'100%'}
-                    >
-                      <div>{option.nickname + ' (' + option.psn_id + ') '}</div>
-                      <div>
-                        <RoleChipStack
-                          spacing={0.5}
-                          roles={{
-                            hasTank: option.has_tank,
-                            hasHealer: option.has_healer,
-                            hasDD: option.has_dd,
-                            hasPvP: option.has_pvp
-                          }}
-                        />
-                      </div>
-                    </Stack>
-                  </Box> 
-                )}
+                value={members}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (
                     <Chip
                       label={option.nickname + ' (' + option.psn_id + ')'}
                       {...getTagProps({ index })}
-                      disabled={option.mid === leader}
-                      color={(option.mid === leader) ? 'secondary' : 'default'}
-                      icon={(option.mid === leader) ? (<FlagIcon />) : (<div/>)}
+                      {...chipColor(option.mid, option.response)}
                     />
                   ))
                 }
                 style={{ width: '100%' }}
                 renderInput={(params) => (
-                  <TextField {...params} label="出團成員" placeholder="新增成員..." />
+                  <TextField {...params} label="出團成員" />
                 )}
               />
             </Grid>
@@ -227,25 +220,32 @@ const CreateGroupView = () => {
                 multiline
                 id="team-desc"
                 label="備註"
-                placeholder='CP160, 武器要升金, ...'
                 minRows={2}
-                disabled={lockUI}
-                onChange={e => {setDesc(e.target.value); setFormDirty(true)}}
+                InputProps={{
+                  readOnly: true
+                }}
+                value={desc}
               />
             </Grid>
-            <Grid item container justifyContent={'right'} columnSpacing={1}>
-              <Grid item>
-                <Link to={'/group'}>
-                  <Button variant="outlined" disabled={lockUI}>取消</Button>
-                </Link>
-              </Grid>
-              <Grid item>
-                <Button 
-                  variant="contained" 
-                  onClick={e => addGroup()}
-                  disabled={!formDirty || !formValid || lockUI}
-                >創立團隊</Button>
-              </Grid>
+            <Grid item visibility={(leader !== '' && leader !== mid) ? 'visible' : 'hidden'}>
+              <FormControl fullWidth>
+                <InputLabel id="response-select">是否參加</InputLabel>
+                <Select
+                  fullWidth
+                  autoFocus
+                  labelId="response-select"
+                  id="response-select"
+                  value={myResp}
+                  label="是否參加"
+                  disabled={lockUI}
+                  onChange={e => { setMyResp(e.target.value); updateResponse(e.target.value) }}
+                >
+                  <MenuItem value={0}>尚未決定</MenuItem>
+                  <MenuItem value={1}>同意參加</MenuItem>
+                  <MenuItem value={2}>無法參加</MenuItem>
+                </Select>
+              </FormControl>
+              
             </Grid>
           </Grid>
         </Paper>
@@ -254,4 +254,4 @@ const CreateGroupView = () => {
   );
 };
 
-export default CreateGroupView
+export default CheckGroupView

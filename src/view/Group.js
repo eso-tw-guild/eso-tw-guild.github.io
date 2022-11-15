@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import Grid from '@mui/material/Grid';
 import AppBar from '@mui/material/AppBar';
 import Fab from '@mui/material/Fab';
@@ -12,19 +14,29 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
-
-function createData(team_name, team_lead, team_time) {
-  return { team_name, team_lead, team_time };
-}
-
-const rows = [
-  createData('VDSR', '罐頭 (blackcanlin)', '2022-12-01 22:00:00 GMT+8'),
-  createData('VSS 衝衝團', '罐頭 (blackcanlin)', '2022-12-02 22:00:00 GMT+8'),
-  createData('去死去死團', '罐頭 (blackcanlin)', '2022-12-03 22:00:00 GMT+8'),
-];
+import Link from "@material-ui/core/Link";
+import { Link as RouteLink } from 'react-router-dom';
+import { fetchGet } from '../component/Fetch';
+import { ApiBaseURL } from '../component/Conf';
 
 const GroupView = () => {
+  const [groups, setGroups] = useState([]);
+
+  useEffect(() => {
+    fetchGet(ApiBaseURL + '/groups')
+      .then(
+        res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        }
+      )
+      .then(d => {
+        setGroups(d.data.groups);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  }, []);
   return (
     <div>
       <AppBar position="static">
@@ -32,7 +44,7 @@ const GroupView = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             團隊招募
           </Typography>
-          <Link to={'/main'}>
+          <Link component={RouteLink} to={'/main'}>
             <Button>回首頁</Button>
           </Link>
         </Toolbar>
@@ -40,7 +52,7 @@ const GroupView = () => {
       <Grid container justifyContent={'center'} marginTop={5}>
         <Grid item container direction="column" xs={11}>
           <Grid item container>
-              <h2>您的團隊：</h2>
+              <h2>團隊列表：</h2>
           </Grid>
           <Grid item container>
             <TableContainer component={Paper} elevation={3}>
@@ -53,16 +65,18 @@ const GroupView = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
+                  {groups.map((row) => (
                     <TableRow
-                      key={row.team_name}
+                      key={row.gid}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {row.team_name}
+                        <Link component={RouteLink} color="primary" to={'/check-group/' + row.gid}>
+                          {row.name}
+                        </Link>
                       </TableCell>
-                      <TableCell>{row.team_lead}</TableCell>
-                      <TableCell align="right">{row.team_time}</TableCell>
+                      <TableCell>{row.leader_name + ' (' + row.leader_psn_id + ')'}</TableCell>
+                      <TableCell align="right">{dayjs(row.start_time).format('YYYY-MM-DD HH:mm:ss UTCZ')}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -71,8 +85,8 @@ const GroupView = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Link to={'/create-group'}>
-        <Fab color="primary" aria-label="add" sx={{ position: 'absolute', bottom: 20, right: 20 }}>
+      <Link component={RouteLink} to={'/create-group'}>
+        <Fab color="secondary" aria-label="add" sx={{ position: 'absolute', bottom: 20, right: 20 }}>
           <AddIcon />
         </Fab>
       </Link>

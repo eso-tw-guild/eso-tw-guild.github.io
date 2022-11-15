@@ -10,7 +10,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { Link } from 'react-router-dom';
-import { ApiBaseURL } from '../component/Conf';
+import { ApiBaseURL, WebsiteURL } from '../component/Conf';
 import { BannerSuccess, BannerError } from '../component/Banner';
 import { fetchGet, fetchPut } from '../component/Fetch';
 
@@ -52,22 +52,26 @@ const MyProfileView = () => {
       .then(
         res => {
           setLockUI(false);
-          if (!res.ok) throw new Error(res.status);
-          return res.json();
+          if (res.ok) {
+            return res.json().then(d => {
+              setNickName(d.data.nickname);
+              setPsnID(d.data.psn_id);
+              setHasTank(d.data.has_tank);
+              setHasHealer(d.data.has_healer);
+              setHasDD(d.data.has_dd);
+              setHasPvP(d.data.has_pvp);
+              setShowForm('visible');
+            });
+          }
+          if (res.status === 404) {
+            setShowForm('visible');
+            return;
+          }
+          throw new Error(res.status);
         }
       )
-      .then(d => {
-        setNickName(d.data.nick_name);
-        setPsnID(d.data.psn_id);
-        setHasTank(d.data.has_tank);
-        setHasHealer(d.data.has_healer);
-        setHasDD(d.data.has_dd);
-        setHasPvP(d.data.has_pvp);
-        setShowForm('visible');
-      })
       .catch((error) => {
         showErrorBanner(error); 
-        setShowForm('visible'); 
       });
   }, []);
 
@@ -77,7 +81,7 @@ const MyProfileView = () => {
     setChanged(false);
 
     const data = {
-      nick_name: nickName,
+      nickname: nickName,
       psn_id: psnID,
       has_tank: hasTank,
       has_healer: hasHealer,
@@ -91,7 +95,9 @@ const MyProfileView = () => {
         showSuccessBanner();
         return res.json()
       })
-      .then(data => console.log(data))
+      .then(d => {
+        window.location.href = WebsiteURL + '/#/main';
+      })
       .catch((error) => { showErrorBanner(error); });
   }
 
@@ -137,8 +143,8 @@ const MyProfileView = () => {
                 label="PSN ID"
                 disabled={lockUI}
                 value={psnID}
-                helperText={psnID ? "" : "不可為空"}
-                error={!psnID}
+                helperText={(!psnID && changed) ? "不可為空" : ""}
+                error={(!psnID && changed)}
                 onChange={e => {setPsnID(e.target.value); setChanged(true)}}
               />
             </Grid>
@@ -150,8 +156,8 @@ const MyProfileView = () => {
                 label="暱稱"
                 disabled={lockUI}
                 value={nickName}
-                helperText={nickName ? "" : "不可為空"}
-                error={!nickName}
+                helperText={(!nickName && changed) ? "不可為空" : ""}
+                error={(!nickName && changed)}
                 onChange={e => {setNickName(e.target.value); setChanged(true)}}
               />
             </Grid>

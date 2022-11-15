@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import { fetchGet } from '../component/Fetch';
 import { Link } from 'react-router-dom';
 import { ApiBaseURL } from '../component/Conf';
-import { updateProfile } from '../component/Session';
+import { updateProfile, updateSessionToken } from '../component/Session';
 
 import MenuCard from '../component/MenuCard';
 
@@ -25,15 +25,16 @@ const MainView = () => {
         }
       )
       .then(d => {
-        if (!d.data.psn_id) {
+        if (!d.data.session.psn_id) {
           navigate('/my-profile');
           return;
         }
-        if (!d.data.line_notify_enabled) {
+        if (!d.data.session.line_notify_enabled) {
           navigate('/enable-line-notify');
           return;
         }
-        updateProfile(d.data);
+        updateProfile(d.data.session);
+        updateSessionToken(d.data.token);
         setShowView('visible');
       })
       .catch(e => {

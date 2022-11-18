@@ -13,6 +13,9 @@ import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { StorageKeyTgLineState, LineNotifyCallbackURL, WebsiteURL } from '../component/Conf';
 
+import oneToOne from '../asset/img/line-notify/choose-1-to-1.jpg';
+import linkedMsg from '../asset/img/line-notify/notify-linked-msg.jpg';
+
 const EnableLineNotifyView = () => {
   const [lockUI, setLockUI] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -137,7 +140,13 @@ const EnableLineNotifyView = () => {
               <ol>
                 <li>點擊"連結LINE NOTIFY"按鈕，並登入您的LINE帳號。</li>
                 <li>選擇"透過1對1聊天接收LINE Notify的通知"。</li>
+                  <Grid item xs={11}>
+                    <img src={oneToOne} alt="1-to-1" width={'100%'} />
+                  </Grid>
                 <li>確認有成功收到ESO TW GUILD透過LINE Notify送出的訊息。</li>
+                <Grid item xs={11}>
+                  <img src={linkedMsg} alt="linked" width={'100%'} />
+                </Grid>
               </ol>
             </Grid>
             <Grid item container justifyContent={'center'}>

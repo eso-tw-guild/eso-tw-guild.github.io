@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import Grid from '@mui/material/Grid';
 import { fetchGet } from '../component/Fetch';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { ApiBaseURL } from '../component/Conf';
 import { updateProfile, updateSessionToken } from '../component/Session';
+import Link from '@mui/material/Link';
 
 import MenuCard from '../component/MenuCard';
 
 import heroes from '../asset/img/eso/heroes.jpg'
 import dungeon from '../asset/img/eso/dungeon.jpg'
 import archer from '../asset/img/eso/archer.jpg'
+import achievement from '../asset/img/eso/achievement.jpg'
+import guild from '../asset/img/eso/guild.png'
 
 const MainView = () => {
   const navigate = useNavigate();
@@ -51,29 +54,45 @@ const MainView = () => {
       visibility={showView}
     >
       <Grid container justifyContent="center" columnSpacing={3} rowSpacing={3}>
-        <Grid item xs={10} sm={3}>
-          <Link to={'/group'}>
+        <Grid item xs={10} sm={2}>
+          <RouterLink to={'/group'}>
             <MenuCard
               image={dungeon}
               title={'團隊招募'}
             />
+          </RouterLink>
+        </Grid>
+        <Grid item xs={10} sm={2}>
+          <RouterLink to={'/my-achievement'}>
+            <MenuCard
+              image={achievement}
+              title={'成就積分'}
+            />
+          </RouterLink>
+        </Grid>
+        <Grid item xs={10} sm={2}>
+          <Link href="https://esotwguild.wordpress.com" target="_blank">
+            <MenuCard
+              image={guild}
+              title={'文章心得'}
+            />
           </Link>
         </Grid>
-        <Grid item xs={10} sm={3}>
-          <Link to={'/guild-member'}>
+        <Grid item xs={10} sm={2}>
+          <RouterLink to={'/guild-member'}>
             <MenuCard
               image={heroes}
               title={'公會成員'}
             />
-          </Link>
+          </RouterLink>
         </Grid>
-        <Grid item xs={10} sm={3}>
-          <Link to={'/my-profile'}>
+        <Grid item xs={10} sm={2}>
+          <RouterLink to={'/my-profile'}>
             <MenuCard
               image={archer}
               title={'個人資訊'}
             />
-          </Link>
+          </RouterLink>
         </Grid>
       </Grid>
     </Grid>

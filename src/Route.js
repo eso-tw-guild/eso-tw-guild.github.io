@@ -13,6 +13,7 @@ import MyProfileView from './view/MyProfile';
 import GuildMemberView from './view/GuildMember';
 import LineAuthCallbackView from './view/LineAuthCallback';
 import EnableLineNotifyView from './view/EnableLineNotify';
+import MyAchievementView from './view/MyAchievement';
 
 const Router = () => {
   return (
@@ -25,6 +26,7 @@ const Router = () => {
         <Route path="/check-group/:gid" element={<CheckGroupView />} />
         <Route path="/guild-member" element={<GuildMemberView />} />
         <Route path="/my-profile" element={<MyProfileView />} />
+        <Route path="/my-achievement" element={<MyAchievementView />} />
         <Route path="/line-auth-callback" element={<LineAuthCallbackView />} />
         <Route path="/enable-line-notify" element={<EnableLineNotifyView />} />
         <Route path="/enable-line-notify/:action" element={<EnableLineNotifyView />} />

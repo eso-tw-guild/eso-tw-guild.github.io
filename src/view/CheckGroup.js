@@ -17,7 +17,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import { fetchGet, fetchPut } from '../component/Fetch';
+import { fetchGet, fetchPut, fetchDelete } from '../component/Fetch';
 import { ApiBaseURL, WebsiteURL } from '../component/Conf';
 import { BannerSuccess, BannerError } from '../component/Banner';
 import { getProfile } from '../component/Session';
@@ -26,8 +26,15 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import { useNavigate } from "react-router-dom";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const CheckGroupView = () => {
+  const navigate = useNavigate();
   if (!getProfile()) {
     window.location.href = WebsiteURL;
   }
@@ -45,21 +52,22 @@ const CheckGroupView = () => {
   const [lockUI, setLockUI] = useState(false);
   const [myResp, setMyResp] = useState(0);
   const [leader, setLeader] = useState('');
-
+  const [inGroup, setInGroup] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const resetBanner = () => {
     setShowSuccess(false);
     setShowError(false);
-  }
+  };
   const showSuccessBanner = () => {
     resetBanner();
     setShowSuccess(true);
-  }
+  };
   const showErrorBanner = (e) => {
     resetBanner();
     setShowError(true);
     setErrMsg(e);
-  }
+  };
 
   const chipColor = (mid, response) => {
     if (mid === leader) {
@@ -85,7 +93,15 @@ const CheckGroupView = () => {
       'color': 'default',
       'icon': (<QuestionMarkIcon />)
     }
-  }
+  };
+
+  const dialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const showDialog = () => {
+    setDialogOpen(true);
+  };
 
   const updateResponse = (resp) => {
     resetBanner();
@@ -103,6 +119,19 @@ const CheckGroupView = () => {
         return res.json()
       })
       .then(data => console.log(data))
+      .catch((error) => { showErrorBanner(error); });
+  }
+
+  const removeGroup = () => {
+    resetBanner();
+    setLockUI(true);
+    fetchDelete(ApiBaseURL + '/groups/' + gid)
+      .then(res => {
+        setLockUI(false);
+        if (!res.ok) throw new Error(res.status);
+        showSuccessBanner();
+        navigate('/group');
+      })
       .catch((error) => { showErrorBanner(error); });
   }
 
@@ -129,6 +158,7 @@ const CheckGroupView = () => {
         if (me) {
           setMyResp(me.response);
         }
+        setInGroup(d.data.in_group);
         setShowForm('visible');
       })
       .catch(e => {
@@ -227,7 +257,7 @@ const CheckGroupView = () => {
                 value={desc}
               />
             </Grid>
-            <Grid item visibility={(leader !== '' && leader !== mid) ? 'visible' : 'hidden'}>
+            <Grid item visibility={(leader !== '' && leader !== mid) && (inGroup) ? 'visible' : 'hidden'}>
               <FormControl fullWidth>
                 <InputLabel id="response-select">是否參加</InputLabel>
                 <Select
@@ -245,11 +275,38 @@ const CheckGroupView = () => {
                   <MenuItem value={2}>無法參加</MenuItem>
                 </Select>
               </FormControl>
-              
+            </Grid>
+            <Grid item container justifyContent={'right'} columnSpacing={1} visibility={leader !== '' && leader === mid ? 'visible' : 'hidden'}>
+              <Grid item>
+                <Button
+                  variant="outlined"
+                  onClick={showDialog}
+                  color="error"
+                >刪除團隊</Button>
+              </Grid>
             </Grid>
           </Grid>
         </Paper>
       </Grid>
+      <Dialog
+        open={dialogOpen}
+        onClose={dialogClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {'確定刪除此團隊？'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            刪除團隊將無法復原，需再重新建立團隊。
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={dialogClose} variant="outlined" autoFocus>取消</Button>
+          <Button onClick={removeGroup} variant="contained" color="error">刪除</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

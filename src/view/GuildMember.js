@@ -15,6 +15,7 @@ import { fetchGet } from '../component/Fetch';
 import { Link } from 'react-router-dom';
 import { ApiBaseURL } from '../component/Conf';
 import { RoleChipStack } from '../component/RoleChip';
+import { ScoreChip } from '../component/ScoreChip';
 
 const GuildMemberView = () => {
   const [members, setMembers] = useState([]);
@@ -28,6 +29,7 @@ const GuildMemberView = () => {
         }
       )
       .then(d => {
+        d.data.members.sort((a, b) => a.score > b.score ? -1 : 0);
         setMembers(d.data.members);
       })
       .catch(e => {
@@ -55,6 +57,7 @@ const GuildMemberView = () => {
                 <TableRow>
                   <TableCell>PSN ID</TableCell>
                   <TableCell>暱稱</TableCell>
+                  <TableCell>成就積分</TableCell>
                   <TableCell align='right'>擁有角色</TableCell>
                 </TableRow>
               </TableHead>
@@ -68,6 +71,9 @@ const GuildMemberView = () => {
                       {row.psn_id}
                     </TableCell>
                     <TableCell>{row.nickname}</TableCell>
+                    <TableCell>
+                      <ScoreChip value={row.score} sieze="small" />
+                    </TableCell>
                     <TableCell align="right">
                       <RoleChipStack 
                         spacing={0.5}

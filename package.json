@@ -2,7 +2,7 @@
   "name": "eso-tw-guild.github.io",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://eso-tw-guild.github.io",
+  "homepage": "https://esotwguild.com",
   "dependencies": {
     "@date-io/dayjs": "^2.16.0",
     "@date-io/moment": "^2.16.1",
